@@ -83,6 +83,7 @@ func init() {
 		configFile := env.Get(mcEnvConfigFile, "")
 		fatalIf(readAliasesFromFile(configFile).Trace(configFile), "Unable to parse "+configFile)
 	}
+	// mabing: 如果是双击运行的，就给出友好提示,然后等用户按下回车才退出，避免窗口一闪而过。
 	if runtime.GOOS == "windows" {
 		if mousetrap.StartedByExplorer() {
 			fmt.Printf("Don't double-click %s\n", os.Args[0])
@@ -414,6 +415,7 @@ func checkUpdate(ctx *cli.Context) {
 	}
 }
 
+// mabing: 有哪些可用的子命令
 var appCmds = []cli.Command{
 	aliasCmd,
 	adminCmd,
@@ -478,6 +480,8 @@ func registerApp(name string) *cli.App {
 
 	app := cli.NewApp()
 	app.Name = name
+	//  mabing: 这里注册了要在cli的Run函数里运行的默认的函数,算是一个兜底的比如执行了错误的子命令,就会进入这个函数.
+	// 正确的子命令执行的是cli包里的app.go里的c := a.Command(name)
 	app.Action = func(ctx *cli.Context) error {
 		mcEnable := env.Get("MC_UPDATE", madmin.EnableOn)
 		minioEnable := env.Get("MINIO_UPDATE", madmin.EnableOn)
